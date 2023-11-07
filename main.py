@@ -27,8 +27,8 @@ def save_test():
 @app.route("/update", methods=['POST'])
 def update_service():
     shell_name = "./update.sh"
-    result = subprocess.run(shell_name, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    return "重启了" + str(result)
+    result = subprocess.run(shell_name, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return "重启了" + str(result.returncode)
 
 
 if __name__ == '__main__':
