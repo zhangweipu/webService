@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template
+import subprocess
 
 app = Flask(__name__)
 
@@ -21,6 +22,13 @@ def save_test():
     print(text)
     name = text
     return render_template('index.html', name=name)
+
+
+@app.route("/update", methods=['POST'])
+def update_service():
+    shell_name = "./update.sh"
+    result = subprocess.run(shell_name, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return "重启了" + str(result)
 
 
 if __name__ == '__main__':
