@@ -1,9 +1,26 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, abort, jsonify
 import subprocess
+
+from network.BaseResponse import BaseResponse
+from network.BaseRequest import BaseRequest
+from security import encodeUtil
+
+from entity import Person
 
 app = Flask(__name__)
 
 app.template_folder = 'pages'
+
+
+@app.before_request
+def intercept():
+    custom_header_value = request.headers.get('author')
+    if custom_header_value is None:
+        abort(304, "error")
+    encodeUtil.aes_encrypt("aaa", custom_header_value)
+    if custom_header_value != "test":
+        response = BaseResponse(403, "error", "error")
+        abort(jsonify(response))
 
 
 @app.route("/hello")
@@ -13,7 +30,11 @@ def print_hi():
 
 @app.route("/str")
 def get_str():
-    return '{"name":"aaa"}'
+    s = encodeUtil.aes_encrypt("aaa", "xxxx")
+    stra = 'ssss'
+    stra.ljust(32, '\0')[:32]
+    person = Person(name=s)
+    return jsonify(BaseResponse(data=person).__dict__())
 
 
 @app.route("/submit", methods=['POST'])
