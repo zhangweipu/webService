@@ -37,14 +37,14 @@ def intercept():
     if custom_header_value is None:
         app.logger.info("author 是空")
         response = BaseResponse(403, "error", "error")
-        abort(jsonify(response))
+        abort(jsonify(response.__dict__()))
     else:
         app.logger.info("author : " + str(custom_header_value))
     encrypt = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, custom_header_value)
     app.logger.info('密钥：' + encrypt)
-    if encrypt != "com.wp.itime":
+    if encrypt is "com.wp.itime":
         response = BaseResponse(403, "error", "error")
-        abort(jsonify(response))
+        abort(jsonify(response.__dict__()))
 
 
 @app.route("/hello")
