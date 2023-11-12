@@ -9,6 +9,20 @@ from security import encodeUtil
 
 from entity import Person
 
+import logging
+from logging.handlers import RotatingFileHandler
+
+app = Flask(__name__)
+
+# 配置日志记录
+log_handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=5)
+log_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+log_handler.setLevel(logging.INFO)
+
+app.logger.addHandler(log_handler)
+app.logger.setLevel(logging.INFO)
+app.logger.info('App startup')
+
 app = Flask(__name__)
 
 app.template_folder = 'pages'
@@ -17,12 +31,12 @@ app.template_folder = 'pages'
 @app.before_request
 def intercept():
     custom_header_value = request.headers.get('author')
-    print(custom_header_value)
+    app.logger.info(custom_header_value)
     if custom_header_value is None:
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response))
     encrypt = encodeUtil.aes_encrypt(custom_header_value)
-    print('密钥：'+encrypt)
+    app.logger.info('密钥：'+encrypt)
     if custom_header_value != "test":
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response))
