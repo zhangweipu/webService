@@ -12,6 +12,8 @@ from entity import Person
 import logging
 from logging.handlers import RotatingFileHandler
 
+from security.encodeUtil import SecurityUtils
+
 app = Flask(__name__)
 
 # 配置日志记录
@@ -38,7 +40,7 @@ def intercept():
         abort(jsonify(response))
     else:
         app.logger.info("author : " + str(custom_header_value))
-    encrypt = encodeUtil.aes_encrypt(custom_header_value)
+    encrypt = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, custom_header_value)
     app.logger.info('密钥：' + encrypt)
     if custom_header_value != "com.wp.itime":
         response = BaseResponse(403, "error", "error")

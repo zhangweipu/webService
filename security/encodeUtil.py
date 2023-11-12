@@ -1,60 +1,55 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from base64 import b64encode, b64decode
-from cryptography.hazmat.primitives import padding
-
-key = "shidh,..,@!@#344$5"
-iv = "sfiojifjoffdwert"
-AES_MODE = "AES/CBC/PKCS5Padding"
 
 
-def aes_encrypt(plaintext: str):
-    # Convert key to bytes and pad if necessary
-    # Convert plaintext to bytes
-    plaintext_bytes = plaintext.encode('utf-8')
-    keys = key.ljust(32, '\0').encode('utf-8')[:32]
-    # Create AES encryptor
-    cipher = Cipher(algorithms.AES(keys), modes.CFB(iv.encode('utf-8')), backend=default_backend())
-    encryptor = cipher.encryptor()
+class SecurityUtils:
+    key = b"shidh,..,@!@#344$5"
+    iv = b"sfiojifjoffdwert"
+    AES_MODE = algorithms.AES
+    CHARSET_NAME = "UTF-8"
 
-    # Use PKCS7 padding
-    padder = padding.PKCS7(algorithms.AES.block_size).padder()
-    padded_data = padder.update(plaintext_bytes) + padder.finalize()
+    @classmethod
+    def encrypt(cls, key, iv, plaintext):
+        key = cls.generate_key(key)
+        cipher = Cipher(cls.AES_MODE(key), modes.CFB(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
 
-    # Encrypt data
-    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+        padded_data = plaintext.encode(cls.CHARSET_NAME)
+        ciphertext = encryptor.update(padded_data) + encryptor.finalize()
 
-    # Return base64-encoded ciphertext
-    return b64encode(ciphertext).decode('utf-8')
+        return b64encode(ciphertext).decode(cls.CHARSET_NAME)
+
+    @classmethod
+    def decrypt(cls, key, iv, cipher_text):
+        key = cls.generate_key(key)
+        cipher = Cipher(cls.AES_MODE(key), modes.CFB(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        ciphertext = b64decode(cipher_text)
+        decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+        return decrypted_data.decode(cls.CHARSET_NAME)
+
+    @classmethod
+    def generate_key(cls, key):
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            iterations=1000,
+            salt=key,
+            length=32,
+            backend=default_backend()
+        )
+        key_bytes = kdf.derive(key)
+        return key_bytes
 
 
-def aes_decrypt(ciphertext: str):
-    # Convert key to Unicode string
-    keys = key.ljust(32, '\0').encode('utf-8')[:32]
-
-    # Convert ciphertext to bytes
-    ciphertext_bytes = b64decode(ciphertext)
-
-    # Create AES decryptor
-    cipher = Cipher(algorithms.AES(keys), modes.CFB(iv.encode('utf-8')), backend=default_backend())
-    decryptor = cipher.decryptor()
-
-    # Decrypt data
-    decrypted_data = decryptor.update(ciphertext_bytes) + decryptor.finalize()
-
-    # Use PKCS7 unpadding
-    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
-    plaintext = unpadder.update(decrypted_data) + unpadder.finalize()
-
-    return plaintext.decode('utf-8')
-
-
-# 示例
-#
-# plaintext = 'test'
-#
-# encrypted_text = aes_encrypt(plaintext)
+# # 示例
+# plaintext = 'Hello, World!'
+# encrypted_text = SecurityUtils.encrypt(SecurityUtils.key, SecurityUtils.iv, plaintext)
 # print(f'Encrypted Text: {encrypted_text}')
 #
-# decrypted_text = aes_decrypt(encrypted_text)
+# decrypted_text = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, encrypted_text)
 # print(f'Decrypted Text: {decrypted_text}')
