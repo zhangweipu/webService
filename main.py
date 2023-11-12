@@ -17,10 +17,10 @@ app = Flask(__name__)
 # 配置日志记录
 log_handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=5)
 log_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-log_handler.setLevel(logging.INFO)
+log_handler.setLevel(logging.DEBUG)
 
 app.logger.addHandler(log_handler)
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.DEBUG)
 app.logger.info('App startup')
 
 app = Flask(__name__)
@@ -31,13 +31,16 @@ app.template_folder = 'pages'
 @app.before_request
 def intercept():
     custom_header_value = request.headers.get('author')
-    app.logger.info(custom_header_value)
+    app.logger.info("请求到了 : " + str(custom_header_value is None))
     if custom_header_value is None:
+        app.logger.info("author 是空")
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response))
+    else:
+        app.logger.info("author : " + str(custom_header_value))
     encrypt = encodeUtil.aes_encrypt(custom_header_value)
-    app.logger.info('密钥：'+encrypt)
-    if custom_header_value != "test":
+    app.logger.info('密钥：' + encrypt)
+    if custom_header_value != "com.wp.itime":
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response))
 
@@ -51,6 +54,8 @@ def print_hi():
 def get_str():
     s = encodeUtil.aes_encrypt("aaa", "xxxx")
     stra = 'ssss'
+    ss = request.headers.get("author")
+    app.logger.info("sssssss" + ss)
     stra.ljust(32, '\0')[:32]
     person = Person(name=s)
     return jsonify(BaseResponse(data=person).__dict__())
