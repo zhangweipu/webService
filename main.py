@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, request, render_template, abort, jsonify
 import subprocess
 
@@ -15,9 +17,12 @@ app.template_folder = 'pages'
 @app.before_request
 def intercept():
     custom_header_value = request.headers.get('author')
+    logging.debug(custom_header_value)
     if custom_header_value is None:
-        abort(304, "error")
-    encodeUtil.aes_encrypt("aaa", custom_header_value)
+        response = BaseResponse(403, "error", "error")
+        abort(jsonify(response))
+    encrypt = encodeUtil.aes_encrypt(custom_header_value)
+    logging.debug('密钥：'+encrypt)
     if custom_header_value != "test":
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response))

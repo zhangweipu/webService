@@ -3,16 +3,18 @@ from cryptography.hazmat.backends import default_backend
 from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives import padding
 
+key = "shidh,..,@!@#344$5"
+iv = "sfiojifjoffdwert"
+AES_MODE = "AES/CBC/PKCS5Padding"
 
-def aes_encrypt(key: str, plaintext: str):
+
+def aes_encrypt(plaintext: str):
     # Convert key to bytes and pad if necessary
-    key = key.ljust(32, '\0')[:32].encode('utf-8')
-
     # Convert plaintext to bytes
     plaintext_bytes = plaintext.encode('utf-8')
-
+    keys = key.ljust(32, '\0').encode('utf-8')[:32]
     # Create AES encryptor
-    cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+    cipher = Cipher(algorithms.AES(keys), modes.CFB(iv.encode('utf-8')), backend=default_backend())
     encryptor = cipher.encryptor()
 
     # Use PKCS7 padding
@@ -26,15 +28,15 @@ def aes_encrypt(key: str, plaintext: str):
     return b64encode(ciphertext).decode('utf-8')
 
 
-def aes_decrypt(key: str, ciphertext: str):
+def aes_decrypt(ciphertext: str):
     # Convert key to Unicode string
-    key = key.ljust(32, '\0').encode('utf-8')[:32]
+    keys = key.ljust(32, '\0').encode('utf-8')[:32]
 
     # Convert ciphertext to bytes
     ciphertext_bytes = b64decode(ciphertext)
 
     # Create AES decryptor
-    cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+    cipher = Cipher(algorithms.AES(keys), modes.CFB(iv.encode('utf-8')), backend=default_backend())
     decryptor = cipher.decryptor()
 
     # Decrypt data
@@ -47,13 +49,12 @@ def aes_decrypt(key: str, ciphertext: str):
     return plaintext.decode('utf-8')
 
 
-
 # 示例
-# key = 'mysecretkey'
-# plaintext = 'Hello, World!'
 #
-# encrypted_text = aes_encrypt(key, plaintext)
+# plaintext = 'test'
+#
+# encrypted_text = aes_encrypt(plaintext)
 # print(f'Encrypted Text: {encrypted_text}')
 #
-# decrypted_text = aes_decrypt(key, encrypted_text)
+# decrypted_text = aes_decrypt(encrypted_text)
 # print(f'Decrypted Text: {decrypted_text}')
