@@ -54,6 +54,7 @@ def print_hi():
 
 @app.route("/str")
 def get_str():
+    app.logger.info("请求信息")
     s = "tom"
     person = Person(name=s)
     return jsonify(BaseResponse(data=person).__dict__())
