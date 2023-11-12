@@ -54,11 +54,7 @@ def print_hi():
 
 @app.route("/str")
 def get_str():
-    s = encodeUtil.aes_encrypt("aaa", "xxxx")
-    stra = 'ssss'
-    ss = request.headers.get("author")
-    app.logger.info("sssssss" + ss)
-    stra.ljust(32, '\0')[:32]
+    s = "tom"
     person = Person(name=s)
     return jsonify(BaseResponse(data=person).__dict__())
 
