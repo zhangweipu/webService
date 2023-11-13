@@ -54,3 +54,14 @@ class SecurityUtils:
 #
 # decrypted_text = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, "x4XU4mk3b4xQqPkFq60KOg==")
 # print(f'Decrypted Text: {decrypted_text}')
+# print(type(decrypted_text))
+# print(type("com.wp.itime"))
+# ssd=decrypted_text.replace('\x04', '')
+# print(ssd)
+# if ssd == 'com.wp.itime':
+#     print("sss")
+# else:
+#     print("aaaaa")
+# for i in ssd:
+#     if i!='\t':
+#         print(i)

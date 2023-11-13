@@ -51,6 +51,7 @@ def intercept():
         app.logger.info("author : " + str(custom_header_value))
     encrypt = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, custom_header_value)
     app.logger.info('密钥：' + encrypt)
+    encrypt = encrypt.replace('\x04', '')
     if encrypt != "com.wp.itime":
         app.logger.info("密钥不正确")
         response = BaseResponse(403, "error", "error")
