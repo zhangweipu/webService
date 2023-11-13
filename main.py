@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from flask import Flask, request, render_template, abort, jsonify
 import subprocess
@@ -30,6 +31,14 @@ app = Flask(__name__)
 app.template_folder = 'pages'
 
 
+def handle_uncatched_error(exctype, value, traceback):
+    app.logger.error(f"Exception: {exctype}, {value}")
+    app.logger.error("Traceback", exc_info=(exctype, value, traceback))
+
+
+sys.excepthook = handle_uncatched_error
+
+
 @app.before_request
 def intercept():
     custom_header_value = request.headers.get('author')
@@ -42,9 +51,12 @@ def intercept():
         app.logger.info("author : " + str(custom_header_value))
     encrypt = SecurityUtils.decrypt(SecurityUtils.key, SecurityUtils.iv, custom_header_value)
     app.logger.info('密钥：' + encrypt)
-    if encrypt is "com.wp.itime":
+    if encrypt != "com.wp.itime":
+        app.logger.info("密钥不正确")
         response = BaseResponse(403, "error", "error")
         abort(jsonify(response.__dict__()))
+    else:
+        app.logger.info("密钥正确")
 
 
 @app.route("/hello")
